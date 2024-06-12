@@ -10,12 +10,12 @@ services:
       - KEYCLOAK_ADMIN_PASSWORD=admin
     command: start-dev
 
-    #mariadb-1
+  #mariadb-1
   mariadb1:
     image: mariadb:10.5
     container_name: mariadb1
     ports:
-      - "3306:3306"
+      - "3307:3306"
     env_file: .env
     environment:
       - MARIADB_USER=${MARIADB_USER_1}
@@ -34,7 +34,7 @@ services:
     image: mariadb:10.5
     container_name: mariadb2
     ports:
-      - "3307:3306"
+      - "3308:3306"
     env_file: .env   
     environment:
       - MARIADB_USER=${MARIADB_USER_2}
@@ -48,16 +48,14 @@ services:
     networks:
       - mariadb
 
-  #proxysql
-  proxysql: 
-    image: proxysql/proxysql:latest
-    container_name: proxysql
+  db-loadbalancer:
+    image: mariadb/maxscale:24.02.1
     ports:
-      - "6032:6032"
-      - "6070:6070"
-      - "6080:6080"
-    cap_add:
-      - all
+      - "3306:3306"
+      - "8989:8989"
+    depends_on:
+      - mariadb1
+      - mariadb2
     networks:
       - mariadb
 
