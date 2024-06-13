@@ -1,28 +1,15 @@
 import Keycloak from 'keycloak-js';
 
-const keycloak = new Keycloak({
-  url: 'http://localhost:8080/auth',
-  realm: 'myrealm',
-  clientId: 'myapp',
-});
+let keycloakInstance;
 
-const initOptions = {
-  onLoad: 'login-required',
-};
-
-const KeycloakService = {
-  init: (onAuthenticatedCallback) => {
-    keycloak.init(initOptions).then((authenticated) => {
-      if (!authenticated) {
-        window.location.reload();
-      } else {
-        onAuthenticatedCallback();
-      }
-    }).catch((error) => {
-      console.error('Failed to initialize Keycloak', error);
+export function getKeycloakInstance() {
+  if (!keycloakInstance) {
+    keycloakInstance = new Keycloak({
+        url: 'http://localhost:8080/',
+        realm: 'master',
+        clientId: 'react-client',
     });
-  },
-  getKeycloak: () => keycloak,
-};
+  }
 
-export default KeycloakService;
+  return keycloakInstance;
+}

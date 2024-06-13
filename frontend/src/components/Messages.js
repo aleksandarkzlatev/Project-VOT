@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import KeycloakService from '../keycloakService';
+import getKeycloakInstance from '../keycloakService';
 
 function Messages() {
   const [messages, setMessages] = useState([]);
   const [content, setContent] = useState('');
 
-  const keycloak = KeycloakService.getKeycloak();
+  const keycloak = getKeycloakInstance();
 
   useEffect(() => {
     const fetchMessages = async () => {

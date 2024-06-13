@@ -1,37 +1,19 @@
-import React, { useEffect, useState } from 'react';
-import { BrowserRouter as Router, Route, Switch, Redirect } from 'react-router-dom';
-import Register from './register';
-import Login from './login';
-import Messages from './messages';
-import KeycloakService from './keycloakService';
+import React from 'react';
+import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
+import Login from './components/Login';
+import Register from './components/Register';
+import Messages from './components/Messages';
+import keycloakService from './keycloakService';
 
 function App() {
-  const [keycloak, setKeycloak] = useState(null);
-  const [authenticated, setAuthenticated] = useState(false);
-
-  useEffect(() => {
-    KeycloakService.init(() => {
-      setKeycloak(KeycloakService.getKeycloak());
-      setAuthenticated(true);
-    });
-  }, []);
-
-  if (!keycloak) {
-    return <div>Loading...</div>;
-  }
-
   return (
     <Router>
-      <div>
-        <Switch>
-          <Route path="/messages">
-            {authenticated ? <Messages /> : <Redirect to="/login" />}
-          </Route>
-          <Route path="/login" component={Login} />
-          <Route path="/register" component={Register} />
-          <Redirect from="/" to="/messages" />
-        </Switch>
-      </div>
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/messages" element={<Messages/>}/>
+        <Route path="*" element={<Navigate to="/login" />} />
+      </Routes>
     </Router>
   );
 }

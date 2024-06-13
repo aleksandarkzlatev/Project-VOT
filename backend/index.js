@@ -37,7 +37,7 @@ app.use(bodyParser.json());
 app.use(cors());
 
 // Keycloak public key for JWT verification
-const publicKey = process.env.KEYCLOAK_PUBLIC_KEY;
+const publicKey = process.env.KEYCLOAK_PUBLIC_KEY.replace(/\\n/g, '\n');
 
 const verifyToken = (req, res, next) => {
   const authHeader = req.headers.authorization;
@@ -55,6 +55,47 @@ const verifyToken = (req, res, next) => {
 };
 
 // Routes
+app.post('/register', async (req, res) => {
+  const { username, password } = req.body;
+
+  try {
+    const conn = await pool.getConnection();
+    const result = await conn.query(
+      "INSERT INTO users (username, password) VALUES (?, ?)",
+      [username, password]
+    );
+    conn.release();
+
+    res.status(201).json({ id: result.insertId, username });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
+app.post('/login', async (req, res) => {
+  const { username, password } = req.body;
+
+  try {
+    const conn = await pool.getConnection();
+    const rows = await conn.query(
+      "SELECT id, username FROM users WHERE username = ? AND password = ?",
+      [username, password]
+    );
+    conn.release();
+
+    if (rows.length === 0) {
+      return res.status(401).json({ error: 'Invalid credentials' });
+    }
+
+    const user = rows[0];
+    const token = jwt.sign({ sub: user.id, username: user.username }, publicKey, { algorithm: 'RS256' });
+
+    res.json({ token });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
 app.post('/messages', verifyToken, async (req, res) => {
   try {
     const { content } = req.body;
@@ -108,7 +149,7 @@ app.get('/messages', verifyToken, async (req, res) => {
     `);
     conn.release();
     
-    app.listen(port, () => {
+    server.listen(port, () => {
       console.log(`Server is running on port ${port}`);
     });
   } catch (error) {

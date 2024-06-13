@@ -58,6 +58,8 @@ services:
       - mariadb2
     networks:
       - mariadb
+    volumes:
+      - ./maxscale.cnf:/etc/maxscale.cnf
 
   backend:
     build: ./backend

@@ -1,0 +1,135 @@
+#####################################################
+# MaxScale documentation:                           #
+# https://mariadb.com/kb/en/mariadb-maxscale-23-08/ #
+#####################################################
+
+#########################################################################################
+# Global parameters                                                                     #
+#                                                                                       #
+# Complete list of configuration options:                                               #
+# https://mariadb.com/kb/en/mariadb-maxscale-2308-mariadb-maxscale-configuration-guide/ #
+#########################################################################################
+[maxscale]
+threads=auto
+admin_host=0.0.0.0
+admin_secure_gui=false
+
+############################################################################
+# Server definitions                                                       #
+#                                                                          #
+# Set the address of the server to the network address of a MariaDB server.#
+############################################################################
+
+[mariadb1]
+type=server
+address=mariadb1
+port=3306
+
+[mariadb2]
+type=server
+address=mariadb2
+port=3306
+
+##################################################################################
+# Uncomment this and add MaxScale's IP to proxy_protocol_networks in MariaDB for #
+# easier user management: https://mariadb.com/kb/en/proxy-protocol-support/      #
+##################################################################################
+# proxy_protocol=true
+
+####################################################################################
+# Monitor for the servers                                                          #
+#                                                                                  #
+# This will keep MaxScale aware of the state of the servers.                       #
+# MariaDB Monitor documentation:                                                   #
+# https://mariadb.com/kb/en/mariadb-maxscale-23-08-monitors/                       #
+#                                                                                  #
+# The GRANTs needed by the monitor user depend on the actual monitor.              #
+# The GRANTs required by the MariaDB Monitor can be found here:                    #
+# https://mariadb.com/kb/en/mariadb-maxscale-2308-mariadb-monitor/#required-grants #
+####################################################################################
+
+[MariaDB-Monitor]
+type=monitor
+module=mariadbmon
+servers=mariadb1,mariadb2
+user=admin
+password=admin
+monitor_interval=2000ms
+
+
+####################################################################################################
+# Uncomment these to enable automatic node failover:                                               #
+# https://mariadb.com/kb/en/mariadb-maxscale-2308-mariadb-monitor/#cluster-manipulation-operations #
+#                                                                                                  #
+# The GRANTs required for automatic node failover can be found here:                               #
+# https://mariadb.com/kb/en/mariadb-maxscale-2308-mariadb-monitor/#cluster-manipulation-grants     #
+####################################################################################################
+# auto_failover=true
+# auto_rejoin=true
+# enforce_simple_topology=true
+# replication_user=<username used for replication>
+# replication_password=<password used for replication>
+#################################################################################################
+# Uncomment this if you use more than one MaxScale with automatic node failover:                #
+# https://mariadb.com/kb/en/mariadb-maxscale-2308-mariadb-monitor/#cooperative-monitoring       #
+#################################################################################################
+# cooperative_monitoring_locks=majority_of_all
+
+###########################################################################################
+# Service definitions                                                                     #
+#                                                                                         #
+# Service Definition for a read-only service and a read/write splitting service.          #
+#                                                                                         #
+# The GRANTs needed by the service user can be found here:                                #
+# https://mariadb.com/kb/en/mariadb-maxscale-2308-authentication-modules/#required-grants #
+###########################################################################################
+
+##################################################################
+# ReadConnRoute documentation:                                   #
+# https://mariadb.com/kb/en/mariadb-maxscale-2308-readconnroute/ #
+##################################################################
+
+#[Read-Only-Service]
+#type=service
+#router=readconnroute
+#servers=server1
+#user=admin
+#password=admin
+#router_options=slave
+
+###################################################################
+# ReadWriteSplit documentation:                                   #
+# https://mariadb.com/kb/en/mariadb-maxscale-2308-readwritesplit/ #
+###################################################################
+
+[Read-Write-Service]
+type=service
+router=readwritesplit
+servers=mariadb1,mariadb2
+user=admin
+password=admin
+
+######################################################################################
+# Uncomment these to enable transparent transaction replay on node failure:          #
+# https://mariadb.com/kb/en/mariadb-maxscale-2308-readwritesplit/#transaction_replay #
+######################################################################################
+# transaction_replay=true
+# transaction_replay_timeout=30s
+
+####################################################################
+# Listener definitions for the services                            #
+#                                                                  #
+# These listeners represent the ports the services will listen on. #
+####################################################################
+
+#[Read-Only-Listener]
+#type=listener
+#service=Read-Only-Service
+#protocol=mariadbprotocol
+#port=4008
+
+[Read-Write-Listener]
+type=listener
+service=Read-Write-Service
+protocol=mariadbprotocol
+port=3309
