@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Route, Switch, Redirect } from 'react-router-dom';
-import Register from './components/Register';
-import Login from './components/Login';
-import Messages from './components/Messages';
-import KeycloakService from './KeycloakService';
+import Register from './register';
+import Login from './login';
+import Messages from './messages';
+import KeycloakService from './keycloakService';
 
 function App() {
   const [keycloak, setKeycloak] = useState(null);

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import KeycloakService from '../KeycloakService';
+import KeycloakService from '../keycloakService';
 
 function Messages() {
   const [messages, setMessages] = useState([]);
